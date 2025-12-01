@@ -1,12 +1,14 @@
 advent_of_code::solution!(1);
 
+fn parse(input: &str) -> impl Iterator<Item = i64> {
+    input.lines().map(|line| {
+        let n: i64 = line[1..].parse().unwrap();
+        if line.starts_with('L') { -n } else { n }
+    })
+}
+
 pub fn part_one(input: &str) -> Option<u64> {
-    let res = input
-        .lines()
-        .map(|line| {
-            let n: i64 = line[1..].parse().unwrap();
-            if line.starts_with('L') { -n } else { n }
-        })
+    let res = parse(input)
         .scan(50, |acc, n| {
             *acc = (*acc + n).rem_euclid(100);
             Some(*acc)
@@ -17,12 +19,7 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let res = input
-        .lines()
-        .map(|line| {
-            let n: i64 = line[1..].parse().unwrap();
-            if line.starts_with('L') { -n } else { n }
-        })
+    let res = parse(input)
         .fold((50, 0), |(val, mut wrap_count), n| {
             let res = val + n;
             wrap_count += res.abs() / 100;
