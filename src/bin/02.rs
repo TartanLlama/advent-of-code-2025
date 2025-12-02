@@ -1,8 +1,5 @@
-use std::collections::HashMap;
-
 use factor::factor::factor;
 use multimap::MultiMap;
-use prime_factorization::Factorization;
 
 advent_of_code::solution!(2);
 
