@@ -25,6 +25,7 @@ test_lib = []
 chrono = { version = "0.4.38", optional = true }
 dhat = { version = "0.3.3", optional = true }
 factor = "0.4.0"
+lazysort = "0.2.1"
 multimap = "0.10.1"
 pico-args = "0.5.0"
 prime_factorization = "1.0.5"
