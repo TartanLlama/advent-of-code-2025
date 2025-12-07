@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use rust_lapper::{Interval, Lapper};
 
 advent_of_code::solution!(5);
