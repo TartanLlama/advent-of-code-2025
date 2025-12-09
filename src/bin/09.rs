@@ -1,42 +1,40 @@
-use std::{
-    collections::HashSet,
-    iter::{self, once},
-};
-
 use itertools::Itertools;
+use std::iter::once;
 
 advent_of_code::solution!(9);
 
-fn parse(input: &str) -> Vec<(i64, i64)> {
+type Coord = (i64, i64);
+
+fn parse(input: &str) -> Vec<Coord> {
     input
         .lines()
         .map(|line| line.split_once(',').unwrap())
         .map(|(x, y)| (x.parse().unwrap(), y.parse().unwrap()))
-        .collect::<Vec<(i64, i64)>>()
+        .collect::<Vec<Coord>>()
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
     let coords = parse(input);
     let res = coords
         .iter()
-        .cartesian_product(&coords)
-        .map(|((a, b), (c, d))| ((a + 1 - c) * (b + 1 - d)).abs())
+        .tuple_combinations()
+        .map(|(&a, &b)| area((a, b)))
         .max()
         .unwrap();
     Some(res as u64)
 }
 
-fn normalize(a: (i64, i64), b: (i64, i64)) -> ((i64, i64), (i64, i64)) {
+fn normalize(a: Coord, b: Coord) -> (Coord, Coord) {
     ((a.0.min(b.0), a.1.min(b.1)), (a.0.max(b.0), a.1.max(b.1)))
 }
 
-fn point_in_rect(point: (i64, i64), rect: ((i64, i64), (i64, i64))) -> bool {
+fn point_in_rect(point: Coord, rect: (Coord, Coord)) -> bool {
     let (x, y) = point;
     let ((rx1, ry1), (rx2, ry2)) = rect;
     x > rx1 && x < rx2 && y > ry1 && y < ry2
 }
 
-fn valid_rect(rect: ((i64, i64), (i64, i64)), coords: &Vec<(i64, i64)>) -> bool {
+fn valid_rect(rect: (Coord, Coord), coords: &Vec<Coord>) -> bool {
     coords
         .iter()
         .chain(once(&coords[0]))
@@ -50,17 +48,20 @@ fn valid_rect(rect: ((i64, i64), (i64, i64)), coords: &Vec<(i64, i64)>) -> bool 
         })
 }
 
+fn area(rect: (Coord, Coord)) -> i64 {
+    ((rect.1.0 - rect.0.0).abs() + 1) * ((rect.1.1 - rect.0.1).abs() + 1)
+}
+
 pub fn part_two(input: &str) -> Option<u64> {
     let coords = parse(input);
-    let mut max = 0;
-    for (i, &a) in coords.iter().enumerate() {
-        for &b in coords.iter().skip(i + 1) {
-            let area = ((a.0 + 1 - b.0) * (a.1 + 1 - b.1)).abs();
-            if area > max && valid_rect(normalize(a, b), &coords) {
-                max = area;
-            }
-        }
-    }
+    let max = coords
+        .iter()
+        .tuple_combinations()
+        .sorted_by(|&(&a, &b), &(&c, &d)| area((a, b)).cmp(&area((c, d))).reverse())
+        .find(|&(&a, &b)| valid_rect(normalize(a, b), &coords))
+        .map(|(&a, &b)| area((a, b)) as u64)
+        .unwrap();
+
     Some(max as u64)
 }
 
