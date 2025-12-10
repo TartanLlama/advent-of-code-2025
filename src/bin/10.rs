@@ -129,22 +129,17 @@ fn min_presses_for_joltages(machine: &Machine) -> u64 {
         .sum()
 }
 
-pub fn part_one(input: &str) -> Option<u64> {
+fn solve(input: &str, solver: fn(&Machine) -> u64) -> u64 {
     let machines = parse(input);
-    let res = machines
-        .iter()
-        .map(|machine| min_presses_for_lights(machine))
-        .sum();
-    Some(res)
+    machines.iter().map(|machine| solver(machine)).sum()
+}
+
+pub fn part_one(input: &str) -> Option<u64> {
+    solve(input, min_presses_for_lights).into()
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let machines = parse(input);
-    let res = machines
-        .iter()
-        .map(|machine| min_presses_for_joltages(machine))
-        .sum();
-    Some(res)
+    solve(input, min_presses_for_joltages).into()
 }
 
 #[cfg(test)]
