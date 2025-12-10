@@ -32,5 +32,6 @@ pico-args = "0.5.0"
 prime_factorization = "1.0.5"
 rust-lapper = "1.2.0"
 tinyjson = "2.5.1"
+z3 = { version = "0.19.5", features = ["gh-release"] }
 
 # Solution dependencies
