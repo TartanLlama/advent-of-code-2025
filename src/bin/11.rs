@@ -12,70 +12,72 @@ fn parse(input: &str) -> HashMap<&str, Vec<&str>> {
     lookup
 }
 
-pub fn part_one(input: &str) -> Option<u64> {
-    fn solve_recursive<'a>(
+fn solve<State>(
+    input: &str,
+    start_node: &str,
+    initial_state: State,
+    state_fn: impl Fn(State, &str) -> State,
+    path_validator: impl Fn(&State) -> bool,
+) -> u64
+where
+    State: Hash + Eq + Copy,
+{
+    let nodes = parse(input);
+    let mut memo = HashMap::new();
+    fn solve_recursive<'a, State>(
         node: &'a str,
         nodes: &HashMap<&str, Vec<&'a str>>,
-        memo: &mut HashMap<&'a str, u64>,
-    ) -> u64 {
+        memo: &mut HashMap<(&'a str, State), u64>,
+        state: State,
+        state_fn: &impl Fn(State, &str) -> State,
+        path_validator: &impl Fn(&State) -> bool,
+    ) -> u64
+    where
+        State: Hash + Eq + Copy,
+    {
         if node == "out" {
-            return 1;
+            return path_validator(&state) as u64;
         }
-        if let Some(&res) = memo.get(node) {
+        if let Some(&res) = memo.get(&(node, state)) {
             return res;
         }
+        let state = state_fn(state, node);
         let res = nodes
             .get(node)
             .unwrap()
             .iter()
-            .map(|child| solve_recursive(child, nodes, memo))
+            .map(|child| solve_recursive(child, nodes, memo, state, state_fn, path_validator))
             .sum();
-        memo.insert(node, res);
+        memo.insert((node, state), res);
         res
     }
-    let nodes = parse(input);
-    let mut memo = HashMap::new();
-    solve_recursive("you", &nodes, &mut memo).into()
+    solve_recursive(
+        start_node,
+        &nodes,
+        &mut memo,
+        initial_state,
+        &state_fn,
+        &path_validator,
+    )
+}
+
+pub fn part_one(input: &str) -> Option<u64> {
+    solve(input, "you", (), |_, _| (), |_| true).into()
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    fn solve_recursive<'a>(
-        node: &'a str,
-        nodes: &HashMap<&str, Vec<&'a str>>,
-        memo: &mut HashMap<(&'a str, bool, bool), u64>,
-        visited_dac: bool,
-        visited_fft: bool,
-    ) -> u64 {
-        if node == "out" {
-            return (visited_dac && visited_fft) as u64;
-        }
-
-        let key = (node, visited_dac, visited_fft);
-        if let Some(&res) = memo.get(&key) {
-            return res;
-        }
-
-        let res = nodes
-            .get(node)
-            .unwrap()
-            .iter()
-            .map(|child| {
-                solve_recursive(
-                    child,
-                    nodes,
-                    memo,
-                    visited_dac || *child == "dac",
-                    visited_fft || *child == "fft",
-                )
-            })
-            .sum();
-        memo.insert(key, res);
-        res
-    }
-
-    let nodes = parse(input);
-    let mut memo = HashMap::new();
-    solve_recursive("svr", &nodes, &mut memo, false, false).into()
+    solve(
+        input,
+        "svr",
+        (false, false),
+        |(visited_dac, visited_fft), node| match node {
+            "dac" => (true, visited_fft),
+            "fft" => (visited_dac, true),
+            _ => (visited_dac, visited_fft),
+        },
+        |&(visited_dac, visited_fft)| visited_dac && visited_fft,
+    )
+    .into()
 }
 
 #[cfg(test)]
