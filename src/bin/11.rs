@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, hash::Hash, rc::Rc};
+use std::{collections::HashMap, hash::Hash};
 
 advent_of_code::solution!(11);
 
