@@ -22,8 +22,6 @@ fn solve<State>(
 where
     State: Hash + Eq + Copy,
 {
-    let nodes = parse(input);
-    let mut memo = HashMap::new();
     fn solve_recursive<'a, State>(
         node: &'a str,
         nodes: &HashMap<&str, Vec<&'a str>>,
@@ -51,6 +49,8 @@ where
         memo.insert((node, state), res);
         res
     }
+    let nodes = parse(input);
+    let mut memo = HashMap::new();
     solve_recursive(
         start_node,
         &nodes,
